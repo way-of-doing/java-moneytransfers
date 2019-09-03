@@ -1,0 +1,154 @@
+{
+	"info": {
+		"_postman_id": "fa974c90-ff30-49fc-96c0-b79e128e514f",
+		"name": "All",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Account",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{API_ROOT}}/account/:id/",
+					"host": [
+						"{{API_ROOT}}"
+					],
+					"path": [
+						"account",
+						":id",
+						""
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "foo"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Account",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"foo\",\n    \"balance\": {\n        \"currency\": \"EUR\",\n        \"value\": \"12345678901234567890123456789012345678901234567890.12345678910111213141516171819202122232425262728\"\n    }\n}"
+				},
+				"url": {
+					"raw": "{{API_ROOT}}/account/",
+					"host": [
+						"{{API_ROOT}}"
+					],
+					"path": [
+						"account",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upsert Account",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"bar\",\n    \"balance\": {\n        \"currency\": \"EUR\",\n        \"value\": \"324\"\n    }\n}"
+				},
+				"url": {
+					"raw": "{{API_ROOT}}/account/:id/",
+					"host": [
+						"{{API_ROOT}}"
+					],
+					"path": [
+						"account",
+						":id",
+						""
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "bar"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Account",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{API_ROOT}}/account/:id/",
+					"host": [
+						"{{API_ROOT}}"
+					],
+					"path": [
+						"account",
+						":id",
+						""
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "foo"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Money Transfer",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"from\": \"foo\",\n    \"to\": \"bar\",\n    \"value\": {\n        \"currency\": \"EUR\",\n        \"amount\": 50\n    }\n}"
+				},
+				"url": {
+					"raw": "{{API_ROOT}}/moneytransfer/",
+					"host": [
+						"{{API_ROOT}}"
+					],
+					"path": [
+						"moneytransfer",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
