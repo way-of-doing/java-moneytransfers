@@ -11,10 +11,12 @@ import com.jannis.assignment.revolut.domain.transaction.MoneyTransfer;
 import org.javamoney.moneta.Money;
 import org.junit.jupiter.api.*;
 
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Scanner;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -193,30 +195,29 @@ class IntegrationTest {
 
     private RequestResult makeRequestAndGetResponse(String method, String path, String requestBody) {
         try {
-            final var url = new URL("http://localhost:8888/" + path);
-            final var connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod(method);
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setConnectTimeout(1000);
-            connection.setReadTimeout(1000);
+            HttpClient client = HttpClient.newBuilder()
+                    .version(HttpClient.Version.HTTP_1_1)
+                    .followRedirects(HttpClient.Redirect.NORMAL)
+                    .connectTimeout(Duration.ofSeconds(1))
+                    .executor(Runnable::run)
+                    .build();
 
-            if (requestBody != null) {
-                connection.setDoOutput(true);
-                final var outputStreamWriter = new OutputStreamWriter(connection.getOutputStream(), "UTF-8");
-                outputStreamWriter.write(requestBody.replace('\'', '"'));
-                outputStreamWriter.flush();
-                outputStreamWriter.close();
-            }
+            final var bodyPublisher = requestBody == null
+                    ? HttpRequest.BodyPublishers.noBody()
+                    : HttpRequest.BodyPublishers.ofString(requestBody);
 
-            final var responseCode = connection.getResponseCode();
-            final var inputStream = responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream();
-            final var responseBodyScanner = new Scanner(inputStream).useDelimiter("\\A");
-            final var responseBody = responseBodyScanner.hasNext() ? responseBodyScanner.next() : "";
-            connection.disconnect();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8888/" + path))
+                    .timeout(Duration.ofSeconds(1))
+                    .header("Content-Type", "application/json")
+                    .method(method, bodyPublisher)
+                    .build();
 
-            return new RequestResult(responseCode, responseBody);
+            final var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            return new RequestResult(response.statusCode(), response.body());
         }
-        catch (Exception e) {
+        catch (IOException | InterruptedException e) {
             System.err.println(e.toString());
             return new RequestResult(-1, "");
         }
