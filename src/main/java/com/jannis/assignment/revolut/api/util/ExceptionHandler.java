@@ -22,8 +22,8 @@ public final class ExceptionHandler {
         ExceptionHandler.Gson = gson;
 
         exception(UnknownCurrencyException.class, wrap(ExceptionHandler::unknownCurrency));
-        exception(JsonDeserializationException.class, wrap(ExceptionHandler::jsonDeserialization));
-        exception(JsonSyntaxException.class, wrap(ExceptionHandler::jsonParse));
+        exception(JsonParseException.class, wrap(ExceptionHandler::jsonParse));
+        exception(JsonSyntaxException.class, wrap(ExceptionHandler::jsonSyntax));
         exception(NumberFormatException.class, wrap(ExceptionHandler::numberFormat));
         exception(Exception.class, ExceptionHandler::debug);
     }
@@ -43,15 +43,15 @@ public final class ExceptionHandler {
         return e.getMessage();
     }
 
-    private static String jsonDeserialization(JsonDeserializationException e) {
-        return e.getMessage();
-    }
-
     private static String unknownCurrency(UnknownCurrencyException e) {
         return String.format("unknown currency code: '%s'", e.getCurrencyCode());
     }
 
     private static String jsonParse(JsonParseException e) {
+        return e.getMessage();
+    }
+
+    private static String jsonSyntax(JsonSyntaxException e) {
         return "invalid JSON input";
     }
 

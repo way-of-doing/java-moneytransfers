@@ -24,18 +24,18 @@ public class AccountSerializer implements JsonSerializer<Account>, JsonDeseriali
         final var balance = body.getAsJsonObject("balance");
 
         if (id == null || !id.isJsonPrimitive()) {
-            throw new JsonDeserializationException("account 'id' element missing or not a string");
+            throw new JsonParseException("account 'id' element missing or not a string");
         } else if (balance == null) {
-            throw new JsonDeserializationException("account without 'balance' element");
+            throw new JsonParseException("account without 'balance' element");
         }
 
         final var balanceValue = balance.get("value");
         final var balanceCurrency = balance.get("currency");
 
         if (balanceValue == null || !balanceValue.isJsonPrimitive()) {
-            throw new JsonDeserializationException("balance 'value' element missing or not a primitive");
+            throw new JsonParseException("balance 'value' element missing or not a primitive");
         } else if (balanceCurrency == null || !balanceCurrency.isJsonPrimitive()) {
-            throw new JsonDeserializationException("balance 'currency' element missing or not a primitive");
+            throw new JsonParseException("balance 'currency' element missing or not a primitive");
         }
 
         return Account.of(id.getAsString(), balanceCurrency.getAsString(), balanceValue.getAsNumber());
