@@ -19,7 +19,7 @@ final class AtomicTransaction implements TransactionIntent {
     }
 
     @Override
-    public void execute(TransactionExecutionContext context) {
+    public void execute(TransactionExecutionContext context) throws TransactionLockingFailedException {
         var involvedAccounts = this.inner.getInvolvedAccounts().toArray(AccountId[]::new);
         makeExecutionAtomicByLocking(this.inner::execute, involvedAccounts).accept(context);
     }
