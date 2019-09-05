@@ -40,7 +40,9 @@ public final class MoneyTransfer implements TransactionIntent {
         final var source = context.getAccountResolver().resolve(this.sourceId);
         final var destination = context.getAccountResolver().resolve(this.destinationId);
 
-        if (source == null) {
+        if (this.amount.isNegative()) {
+            throw new TransactionException("Transfers of negative amounts are not allowed");
+        } else if (source == null) {
             throw new TransactionException("Could not resolve source account id");
         } else if (destination == null) {
             throw new TransactionException("Could not resolve destination account id");

@@ -63,6 +63,19 @@ class MoneyTransferTest {
     }
 
     @Test
+    void transferWithNegativeValueIsNotAllowed() {
+        final var source = Account.of("source", "EUR", 100);
+        final var destination = Account.of("destination ", "EUR", 100);
+        final var transfer = new MoneyTransfer(source.getId(), destination.getId(), Money.of(-10, "EUR"));
+
+        assertThrows(
+                TransactionException.class,
+                () -> transfer.execute(getExecutionContextOf(source, destination)),
+                "Transfers with negative value should not be allowed"
+        );
+    }
+
+    @Test
     void transferMovesMoneyAround() {
         final var source = Account.of("source", "EUR", 100);
         final var destination = Account.of("destination ", "EUR", 100);
