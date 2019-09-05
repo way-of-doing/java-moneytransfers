@@ -9,27 +9,36 @@ import com.jannis.assignment.revolut.domain.transaction.MoneyTransfer;
 import spark.Spark;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static spark.Spark.*;
 import static spark.Spark.post;
 
 final public class ApiServer {
-    public static Future<Boolean> start() {
-        // Bit awkward signalling mechanism for initialization success
-        var future = new CompletableFuture<Boolean>();
+    private static boolean hasStarted = false;
+    private static CompletableFuture<Boolean> startFuture = new CompletableFuture<>();
+    private static ThreadPoolExecutor modelThreadPool;
+
+    public static boolean start() {
+        if (hasStarted) {
+            return false;
+        }
+
+        hasStarted = true;
 
         // Setup controller and dependencies
-        var gson = new GsonBuilder()
+        final var gson = new GsonBuilder()
                 .setPrettyPrinting()
                 .disableHtmlEscaping()
                 .registerTypeAdapter(Account.class, new AccountSerializer())
                 .registerTypeAdapter(MoneyTransfer.class, new MoneyTransferSerializer())
                 .create();
-        var businessLogicExecutor = Executors.newFixedThreadPool(4);
-        var model = new ApiModel(businessLogicExecutor);
-        var controller = new ApiController(model, gson);
+
+        modelThreadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(4);
+        final var model = new ApiModel(modelThreadPool);
+        final var controller = new ApiController(model, gson);
 
         // Setup HTTP server globals
         final int listeningPort = 8888;
@@ -37,7 +46,7 @@ final public class ApiServer {
         final int minThreads = 2;
         final int timeOutMillis = 30000;
 
-        initExceptionHandler(future::completeExceptionally);
+        initExceptionHandler(startFuture::completeExceptionally);
 
         threadPool(maxThreads, minThreads, timeOutMillis);
         port(listeningPort);
@@ -65,13 +74,22 @@ final public class ApiServer {
 
         post("/moneytransfer/", controller::postMoneyTransfer);
 
-        new Thread(() -> { awaitInitialization(); future.complete(true); }).start();
+        new Thread(() -> { awaitInitialization(); startFuture.complete(true); }).start();
 
-        return future;
+        try {
+            return startFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException("Could not start API server", e);
+        }
     }
 
     public static void stop() {
-        Spark.stop();
-        awaitStop();
+        try {
+            if (hasStarted && startFuture.get()) {
+                modelThreadPool.shutdown();
+                Spark.stop();
+                awaitStop();
+            }
+        } catch (InterruptedException | ExecutionException ignored) {}
     }
 }

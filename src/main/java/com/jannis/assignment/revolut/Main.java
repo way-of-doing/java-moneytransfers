@@ -9,12 +9,15 @@ public class Main {
         System.out.println("Initializing...");
 
         try {
-            if (ApiServer.start().get()) {
+            if (ApiServer.start()) {
                 System.out.println("Server is listening, press ENTER to exit.");
                 System.in.read();
             }
         } catch (Exception e) {
             System.err.println(e.toString());
+            if (e.getCause() != null) {
+                System.err.println("Reason: " + e.getCause().toString());
+            }
             System.exit(1);
         } finally {
             ApiServer.stop();
