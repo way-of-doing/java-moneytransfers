@@ -8,18 +8,18 @@ import com.jannis.assignment.revolut.domain.transaction.MoneyTransfer;
 import spark.Request;
 import spark.Response;
 
-public class ApiController {
+class ApiController {
     private final ApiModel model;
     private final Gson gson;
 
     private final static String EMPTY_RESPONSE = "";
 
-    public ApiController(ApiModel model, Gson gson) {
+    ApiController(ApiModel model, Gson gson) {
         this.model = model;
         this.gson = gson;
     }
 
-    public Object getAccount(Request request, Response response) {
+    Object getAccount(Request request, Response response) {
         var account = this.model.getAccount(request.params("id"));
         if (account != null) {
             response.status(HttpStatusCodes.OK);
@@ -30,7 +30,7 @@ public class ApiController {
         }
     }
 
-    public Object deleteAccount(Request request, Response response) {
+    Object deleteAccount(Request request, Response response) {
         var account = this.model.deleteAccount(request.params("id"));
         if (account != null) {
             response.status(HttpStatusCodes.OK);
@@ -41,7 +41,7 @@ public class ApiController {
         }
     }
 
-    public Object putAccount(Request request, Response response) {
+    Object putAccount(Request request, Response response) {
         var account = this.gson.fromJson(request.body(), Account.class);
 
         if (account.getId().getValue().equals(request.params("id"))) {
@@ -54,7 +54,7 @@ public class ApiController {
         }
     }
 
-    public Object postAccount(Request request, Response response) {
+    Object postAccount(Request request, Response response) {
         var account = this.gson.fromJson(request.body(), Account.class);
         if (this.model.createNewAccount(account)) {
             response.status(HttpStatusCodes.CREATED);
@@ -65,7 +65,7 @@ public class ApiController {
         }
     }
 
-    public Object postMoneyTransfer(Request request, Response response) {
+    Object postMoneyTransfer(Request request, Response response) {
         var transfer = this.gson.fromJson(request.body(), MoneyTransfer.class);
         this.model.moneyTransfer(transfer);
         response.status(HttpStatusCodes.ACCEPTED);
